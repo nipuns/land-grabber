@@ -63,23 +63,57 @@ YUI().use('node', 'event', function(Y) {
 			}
 		});
 		
-		function transition(oldX, oldY, newX, newY) {
+		function moveUser(direction) {
+			var newX, newY, strokeStartX, strokeStartY, strokeEndX, strokeEndY;
+			var oldX = user.x, oldY = user.y;
+
+			strokeStartX = user.x + USIZE/2;
+			strokeStartY = user.y + USIZE/2;
+
+			switch (direction) {
+				case 'up': 
+					newX         = user.x; 
+					newY         = user.y - USIZE;
+					strokeEndX   = strokeStartX;
+					strokeEndY   = strokeStartY - USIZE;
+					break;
+				case 'down': 
+					newX         = user.x;
+					newY         = user.y + USIZE;
+					strokeEndX   = strokeStartX;
+					strokeEndY   = strokeStartY + USIZE;
+					break;
+				case 'left': 
+					newX         = user.x - USIZE;
+					newY         = user.y;
+					strokeEndX   = strokeStartX - USIZE;
+					strokeEndY   = strokeStartY;
+					break;
+				case 'right': 
+					newX  		 = user.x + USIZE;
+					newY  		 = user.y;
+					strokeEndX   = strokeStartX + USIZE;
+					strokeEndY   = strokeStartY;
+					break;
+			}
+
 			//FIXME Remove a bigger area to ensure that the full rectangle is removed
 			ctx.clearRect(oldX - 5, oldY - 5, USIZE + 10 , USIZE + 10);
 			ctx.strokeRect(newX, newY, USIZE, USIZE);
+			
+			//Update User co-ordinates
+			user.x = newX;
+			user.y = newY;
+
+			ctx.moveTo(strokeStartX, strokeStartY);
+			ctx.lineTo(strokeEndX, strokeEndY);
+			ctx.stroke();
 		}
 
 		function move(e) {
 			e.preventDefault();
-			var x = 0, y = 0;
-			switch (e.direction) {
-				case 'up': transition(user.x, user.y, user.x, user.y - USIZE); user.y -= USIZE; break;
-				case 'down': transition(user.x, user.y, user.x, user.y + USIZE); user.y += USIZE; break;
-				case 'left': transition(user.x, user.y, user.x - USIZE, user.y); user.x -= USIZE; break;
-				case 'right': transition(user.x, user.y, user.x + USIZE, user.y); user.x += USIZE; break;
-			}
-
 			console.log("Move " + e.direction);
+			moveUser(e.direction);
 		}
 
 		Y.one("body").on("move", move);
